@@ -3,12 +3,23 @@ var fs = require('fs');
 var path = require('path');
 var ft = require('./filetypes');
 
+var template = require('./templateEngine');
+
+var data = {bla: "foo",
+           moo: function(){ 
+               return("x");}
+           };
+var mrs = template.interperate("foobie <%= true ? 't' : 'f' %>", data);
+
+console.log("out:" +  mrs)
+
+
 http.createServer(function (req, res) {
     var url = req.url.substr(1);
     path.exists("./flatfile/"+url, function(found){
         if(found){
             console.log("flat file");
-            respond("flatfile/"+url, res);
+            respondFile("flatfile/"+url, res);
         } else {
             path.exists("./controler/"+url, function(controlerFound){
                 if(controlerFound){
@@ -19,7 +30,7 @@ http.createServer(function (req, res) {
                         path.exists("./view/"+url, function(viewFound){
                             if(viewFound){
                                 console.log(" & view");
-                                respond("view/"+url, res);
+                                respondTpl("view/"+url, viewVars, res);
                             }
                         });
                     }
@@ -27,10 +38,10 @@ http.createServer(function (req, res) {
                     path.exists("./view/"+url, function(viewFound){
                         if(viewFound){
                             console.log("just view");
-                            respond("view/"+url, res);
+                            respondTpl("view/"+url, {}, res);
                         } else {
                             //no flatfile, no controler, no view
-                            respond("flatfile/404.html", res);
+                            respondFile("flatfile/404.html", res);
                         }
                     });
                 }//no controler load view
@@ -73,12 +84,28 @@ http.createServer(function (req, res) {
 }).listen(8124, "127.0.0.1");
 
 
-var respond = function(file, res){
+var respondFile = function(file, res){
     res.writeHead(200, {'Content-Type': ft.ext(file)});
     console.log("responding with:" + file + '\n');
     fs.readFile(file, function(err,data){
         console.log(err);
         res.end(data);
+    });
+}
+
+var respondTpl  = function(tplPath, data, res){
+    res.writeHead(200, {'Content-Type': "text/html"});
+    console.log("responding with template:" + tplPath + '\n');
+    fs.readFile(tplPath, 'utf8', function(err,tpl){
+        console.log(tpl);
+        console.log(err);
+        try{
+            res.end(
+                template.interperate(tpl, data));
+        } catch(templateError){
+            console.log(templateError);
+            res.end("Tempalte Error");
+        }
     });
 }
 
