@@ -4,6 +4,29 @@
 // then call foo("bar", function(){
 
 
+//ok, further consideration makes me think the following should happen
+// with this lib
+// cascades should be able to take variables
+// I.E. model(thing).foo(thang), this will also eliminate 
+// the need for the variable passes 
+// cascades should be able to take a mix of regular cascades
+// and async cascades, so regular cascades should be the normal
+// . and async ones can be... @?
+// allowing for something like
+// l("libs.model()@foo().bar()" 
+// our original code would look like: 
+// var bar = 'bar';
+// l("model()@foo(bar)", function(result){ });
+// would be nice if you could pass constants in as well
+// making int like l("model()@foo('bar')", function(result){});
+
+//should also be able to take functions that pass out more than
+// one result, and push those results down to its "children"
+//... how to mix them with variables that were passed in?
+// perhaps either/or? set a special "as passed" char?
+
+
+//currently accepts...
 //l("model.foo", "Bar", function(result){
 
 var Loader = function(){
